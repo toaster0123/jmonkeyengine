@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "commit": "e8cf975be583a668d4121cdce334bfb0c5e75af0",
+    "source_sha256": {
+      "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "f65ed53f1e71aa02c12dfcf0052bdaef1feaf2f758d68c12c85f5cf8a01b73ff",
+      "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "5057cfd7839344789bcbecd27856614cdc5d131cc54c57f3df88dea50df11aec"
+    }
+  },
+  "pr2987": {
+    "commit": "fa5dad4feb492fe86d6d2d5babb604dfe9fe1115",
+    "source_sha256": {
+      "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "5ba0a95784f833f93a564b92ee4c8d6e02a381a08d3c9ec50a811bb27c1f8e11",
+      "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "b35b81382b4fcc14c26d5861a029fbb4fc2c0ae78c666f310b0f84ba39bfc92b"
+    }
+  },
+  "pr2988": {
+    "commit": "aa8d5a6ace78d4872b7f8a06fe6f931b159b32f9",
+    "source_sha256": {
+      "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "159d49aef6edd13d32a374849b9000727754aac1b2fadbba9f2b0f59f5b348fe",
+      "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "857fbc999f1cf492971355724a83c5d91a631540c61eedd7f6f9118f7e59ffe2"
+    }
+  },
+  "pr2989": {
+    "commit": "d6472482fe613ef6d9f0f740593a8d1760f900f5",
+    "source_sha256": {
+      "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "d8ad29c3c63f74175278e91fb72d7e862808bc57f0f624ab573676bacb5224f4",
+      "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "5057cfd7839344789bcbecd27856614cdc5d131cc54c57f3df88dea50df11aec"
+    }
+  }
+}

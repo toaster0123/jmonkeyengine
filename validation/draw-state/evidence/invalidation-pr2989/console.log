@@ -1,0 +1,48 @@
+DRIVER vendor=Mesa renderer=llvmpipe (LLVM 19.1.7, 256 bits) version=OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1 GLSL=OpenGL ES GLSL ES 3.20
+DIVISOR label=renderer-span2-invalidate-span0/before requested=2 native=2 expectedNative=2 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255], [0, 255, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255], [0, 255, 0, 255]] glErrors=0
+DIVISOR label=renderer-span2-invalidate-span0/after requested=0 native=0 expectedNative=0 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=external-used-slot-span2-invalidate-span0/before requested=0 native=0 expectedNative=0 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=external-used-slot-span2-invalidate-span0/after requested=0 native=0 expectedNative=0 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=external-unused-slot-span2-invalidate-span0/after requested=0 native=0 expectedNative=0 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=renderer-span2-no-invalidate-span0-control/before requested=2 native=2 expectedNative=2 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255], [0, 255, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255], [0, 255, 0, 255]] glErrors=0
+DIVISOR label=renderer-span2-no-invalidate-span0-control/after requested=0 native=0 expectedNative=0 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=external-span2-invalidate-span1-control/before requested=0 native=0 expectedNative=0 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=external-span2-invalidate-span1-control/after requested=1 native=1 expectedNative=1 actualPixels=[[255, 0, 0, 255], [0, 255, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] expectedPixels=[[255, 0, 0, 255], [0, 255, 0, 255], [255, 0, 0, 255], [255, 0, 0, 255]] glErrors=0
+DIVISOR label=external-span2-invalidate-span2-control/after requested=2 native=2 expectedNative=2 actualPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255], [0, 255, 0, 255]] expectedPixels=[[255, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255], [0, 255, 0, 255]] glErrors=0
+PASS mode=divisor version=repaired cases=6 nativeDraws=10 pixelReadbacks=40 glErrors=0
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core

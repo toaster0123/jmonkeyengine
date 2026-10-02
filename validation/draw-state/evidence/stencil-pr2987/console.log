@@ -1,0 +1,50 @@
+DRIVER vendor=Mesa renderer=llvmpipe (LLVM 19.1.7, 256 bits) version=OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1 GLSL=OpenGL ES GLSL ES 3.20
+STENCIL phase=disable-unchanged-parameters/enabled-Never enabled=true pixel=[0, 0, 255, 255] expectedEnabled=true expectedPixel=[0, 0, 255, 255] errors=[]
+STENCIL phase=disable-unchanged-parameters/disabled enabled=false pixel=[255, 0, 0, 255] expectedEnabled=false expectedPixel=[255, 0, 0, 255] errors=[]
+STENCIL phase=disable-changing-function-control/enabled-Never enabled=true pixel=[0, 0, 255, 255] expectedEnabled=true expectedPixel=[0, 0, 255, 255] errors=[]
+STENCIL phase=disable-changing-function-control/disabled enabled=false pixel=[255, 0, 0, 255] expectedEnabled=false expectedPixel=[255, 0, 0, 255] errors=[]
+STENCIL phase=front-reference-only-control/ref1 enabled=true pixel=[0, 0, 255, 255] expectedEnabled=true expectedPixel=[0, 0, 255, 255] errors=[]
+STENCIL phase=front-reference-only-control/ref2 enabled=true pixel=[255, 0, 0, 255] expectedEnabled=true expectedPixel=[255, 0, 0, 255] errors=[]
+STENCIL phase=back-reference-only-control/ref1 enabled=true pixel=[0, 0, 255, 255] expectedEnabled=true expectedPixel=[0, 0, 255, 255] errors=[]
+STENCIL phase=back-reference-only-control/ref2 enabled=true pixel=[255, 0, 0, 255] expectedEnabled=true expectedPixel=[255, 0, 0, 255] errors=[]
+STENCIL phase=front-mask-only-control/mask1 enabled=true pixel=[255, 0, 0, 255] expectedEnabled=true expectedPixel=[255, 0, 0, 255] errors=[]
+STENCIL phase=front-mask-only-control/mask2 enabled=true pixel=[0, 0, 255, 255] expectedEnabled=true expectedPixel=[0, 0, 255, 255] errors=[]
+STENCIL phase=back-mask-only-control/mask1 enabled=true pixel=[255, 0, 0, 255] expectedEnabled=true expectedPixel=[255, 0, 0, 255] errors=[]
+STENCIL phase=back-mask-only-control/mask2 enabled=true pixel=[0, 0, 255, 255] expectedEnabled=true expectedPixel=[0, 0, 255, 255] errors=[]
+PASS mode=stencil version=fixed cases=6 nativeDraws=12 pixelReadbacks=12 glErrors=0
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1
+ * GLSL Version: OpenGL ES GLSL ES 3.20
+ * Profile: Core

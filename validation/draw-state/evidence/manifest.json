@@ -1,0 +1,169 @@
+{
+  "format_version": 1,
+  "source_repository": "https://github.com/jMonkeyEngine/jmonkeyengine",
+  "commit_host": "https://github.com/toaster0123/jmonkeyengine",
+  "pins": {
+    "baseline": {
+      "commit": "e8cf975be583a668d4121cdce334bfb0c5e75af0",
+      "source_sha256": {
+        "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "f65ed53f1e71aa02c12dfcf0052bdaef1feaf2f758d68c12c85f5cf8a01b73ff",
+        "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "5057cfd7839344789bcbecd27856614cdc5d131cc54c57f3df88dea50df11aec"
+      }
+    },
+    "pr2987": {
+      "commit": "fa5dad4feb492fe86d6d2d5babb604dfe9fe1115",
+      "source_sha256": {
+        "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "5ba0a95784f833f93a564b92ee4c8d6e02a381a08d3c9ec50a811bb27c1f8e11",
+        "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "b35b81382b4fcc14c26d5861a029fbb4fc2c0ae78c666f310b0f84ba39bfc92b"
+      }
+    },
+    "pr2988": {
+      "commit": "aa8d5a6ace78d4872b7f8a06fe6f931b159b32f9",
+      "source_sha256": {
+        "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "159d49aef6edd13d32a374849b9000727754aac1b2fadbba9f2b0f59f5b348fe",
+        "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "857fbc999f1cf492971355724a83c5d91a631540c61eedd7f6f9118f7e59ffe2"
+      }
+    },
+    "pr2989": {
+      "commit": "d6472482fe613ef6d9f0f740593a8d1760f900f5",
+      "source_sha256": {
+        "jme3-core/src/main/java/com/jme3/renderer/opengl/GLRenderer.java": "d8ad29c3c63f74175278e91fb72d7e862808bc57f0f624ab573676bacb5224f4",
+        "jme3-core/src/main/java/com/jme3/renderer/RenderContext.java": "5057cfd7839344789bcbecd27856614cdc5d131cc54c57f3df88dea50df11aec"
+      }
+    }
+  },
+  "dependency_classpath_entries": [
+    {
+      "type": "file",
+      "sha256": "5557e235a8aa2f9766d5dc609d67948f2a8832c2d796cea9ef1d6cbe0b3b7eaf"
+    },
+    {
+      "type": "directory",
+      "files": 985,
+      "sha256": "cfd93288061b2aa3cda5b043d2f9bc1560e610a76f400510ad88b124624061d4"
+    },
+    {
+      "type": "directory",
+      "files": 221,
+      "sha256": "c8d1e5dafec2cdf290389f7dbf766266f4eb18c3b105f016f52b674489124294"
+    },
+    {
+      "type": "directory",
+      "files": 66,
+      "sha256": "61bbaa9c0cf7d090a6588017cccd2e0e67d9ea5f64ac7ec8947c44d63f72ab60"
+    }
+  ],
+  "harness_sha256": {
+    "src/DrawStatePixelSmoke.java": "02bbb94d93bec0cf08695003935993d476cee2425e80f339e6b3fe0910546f25",
+    "src/InvalidationCoreVaoSmoke.java": "96aea2268974432d1a48e09f83e392f2aeb2008945a397ce4d4a4ef2f10fcf68",
+    "src/InvalidationPixelSmoke.java": "6925accb934b75a033ff1e353d948e64474a2355dcc8ddb0c200ea5012689774",
+    "src/RendererPixelSmoke.java": "bc7add41d7cd3704a2910939a1e1b241a798aab46a1bc9524f0ed5e5248d7400"
+  },
+  "runner_sha256": "a3387ce9d4963400299b37be2ff8c4353292be4fad30b1a6a5e557a9c170b19b",
+  "command_template": "python3 run.py --repository <repository> --java-home <java-home> --dependency-classpath <installed-dependencies> --output <output>",
+  "environment": {
+    "MESA_SHADER_CACHE_DISABLE": "true",
+    "LP_NUM_THREADS": "2",
+    "LIBGL_ALWAYS_SOFTWARE": "true",
+    "LC_ALL": "C",
+    "TZ": "UTC"
+  },
+  "results": [
+    {
+      "name": "stencil-baseline",
+      "source_version": "baseline",
+      "commit": "e8cf975be583a668d4121cdce334bfb0c5e75af0",
+      "harness": "DrawStatePixelSmoke",
+      "mode": "stencil",
+      "expectation": "baseline",
+      "exit_code": 0,
+      "summary": "PASS mode=stencil version=baseline cases=6 nativeDraws=12 pixelReadbacks=12 glErrors=0",
+      "console": "stencil-baseline/console.log",
+      "native_calls": "stencil-baseline/native-state-calls.log"
+    },
+    {
+      "name": "stencil-pr2987",
+      "source_version": "pr2987",
+      "commit": "fa5dad4feb492fe86d6d2d5babb604dfe9fe1115",
+      "harness": "DrawStatePixelSmoke",
+      "mode": "stencil",
+      "expectation": "fixed",
+      "exit_code": 0,
+      "summary": "PASS mode=stencil version=fixed cases=6 nativeDraws=12 pixelReadbacks=12 glErrors=0",
+      "console": "stencil-pr2987/console.log",
+      "native_calls": "stencil-pr2987/native-state-calls.log"
+    },
+    {
+      "name": "divisor-baseline",
+      "source_version": "baseline",
+      "commit": "e8cf975be583a668d4121cdce334bfb0c5e75af0",
+      "harness": "DrawStatePixelSmoke",
+      "mode": "divisor",
+      "expectation": "baseline",
+      "exit_code": 0,
+      "summary": "PASS mode=divisor version=baseline cases=6 nativeDraws=12 pixelReadbacks=48 glErrors=0",
+      "console": "divisor-baseline/console.log",
+      "native_calls": "divisor-baseline/native-state-calls.log"
+    },
+    {
+      "name": "divisor-pr2988",
+      "source_version": "pr2988",
+      "commit": "aa8d5a6ace78d4872b7f8a06fe6f931b159b32f9",
+      "harness": "DrawStatePixelSmoke",
+      "mode": "divisor",
+      "expectation": "fixed",
+      "exit_code": 0,
+      "summary": "PASS mode=divisor version=fixed cases=6 nativeDraws=12 pixelReadbacks=48 glErrors=0",
+      "console": "divisor-pr2988/console.log",
+      "native_calls": "divisor-pr2988/native-state-calls.log"
+    },
+    {
+      "name": "invalidation-baseline",
+      "source_version": "baseline",
+      "commit": "e8cf975be583a668d4121cdce334bfb0c5e75af0",
+      "harness": "InvalidationPixelSmoke",
+      "mode": "divisor",
+      "expectation": "baseline",
+      "exit_code": 0,
+      "summary": "PASS mode=divisor version=baseline cases=6 nativeDraws=10 pixelReadbacks=40 glErrors=0",
+      "console": "invalidation-baseline/console.log",
+      "native_calls": "invalidation-baseline/native-state-calls.log"
+    },
+    {
+      "name": "invalidation-pr2988",
+      "source_version": "pr2988",
+      "commit": "aa8d5a6ace78d4872b7f8a06fe6f931b159b32f9",
+      "harness": "InvalidationPixelSmoke",
+      "mode": "divisor",
+      "expectation": "pr2988",
+      "exit_code": 0,
+      "summary": "PASS mode=divisor version=pr2988 cases=6 nativeDraws=10 pixelReadbacks=40 glErrors=0",
+      "console": "invalidation-pr2988/console.log",
+      "native_calls": "invalidation-pr2988/native-state-calls.log"
+    },
+    {
+      "name": "invalidation-pr2989",
+      "source_version": "pr2989",
+      "commit": "d6472482fe613ef6d9f0f740593a8d1760f900f5",
+      "harness": "InvalidationPixelSmoke",
+      "mode": "divisor",
+      "expectation": "repaired",
+      "exit_code": 0,
+      "summary": "PASS mode=divisor version=repaired cases=6 nativeDraws=10 pixelReadbacks=40 glErrors=0",
+      "console": "invalidation-pr2989/console.log",
+      "native_calls": "invalidation-pr2989/native-state-calls.log"
+    },
+    {
+      "name": "core-vao-pr2989",
+      "source_version": "pr2989",
+      "commit": "d6472482fe613ef6d9f0f740593a8d1760f900f5",
+      "harness": "InvalidationCoreVaoSmoke",
+      "mode": null,
+      "expectation": null,
+      "exit_code": 0,
+      "summary": "PASS core invalidation compatibility control",
+      "console": "core-vao-pr2989/console.log",
+      "native_calls": null
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+CASE span-1-to-2/different-buffer
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 1]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=1 [4, 0, 6, 4]
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 2]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+CASE span-2-to-1/different-buffer
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 2]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 1]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=1 [4, 0, 6, 4]
+CASE span-1-to-2/same-buffer
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 1]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=1 [4, 0, 6, 4]
+glVertexAttribDivisorARB [4, 2]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+CASE span-2-to-1/same-buffer
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 2]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+glVertexAttribDivisorARB [4, 1]
+DRAW nativeDivisor=1 [4, 0, 6, 4]
+CASE span-0-to-2/different-buffer
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 2]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+CASE span-2-to-0/different-buffer
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 2]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+glBufferData target=34962
+glVertexAttribDivisorARB [4, 0]
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]

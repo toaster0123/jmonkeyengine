@@ -1,0 +1,73 @@
+CASE renderer-span2-invalidate-span0
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [4, 2]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+INVALIDATE nativeDivisor=2
+glVertexAttribDivisorARB [4, 0]
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [0, 0]
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+CASE external-used-slot-span2-invalidate-span0
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+EXTERNAL glVertexAttribDivisor [4, 2]
+INVALIDATE nativeDivisor=2
+glVertexAttribDivisorARB [4, 0]
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [0, 0]
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+CASE external-unused-slot-span2-invalidate-span0
+EXTERNAL glVertexAttribDivisor [4, 2]
+INVALIDATE nativeDivisor=2
+glVertexAttribDivisorARB [4, 0]
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [0, 0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+CASE renderer-span2-no-invalidate-span0-control
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [4, 2]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [4, 0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+CASE external-span2-invalidate-span1-control
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=0 [4, 0, 6, 4]
+EXTERNAL glVertexAttribDivisor [4, 2]
+INVALIDATE nativeDivisor=2
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [4, 1]
+glVertexAttribDivisorARB [0, 0]
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=1 [4, 0, 6, 4]
+CASE external-span2-invalidate-span2-control
+EXTERNAL glVertexAttribDivisor [4, 2]
+INVALIDATE nativeDivisor=2
+glBufferData target=34962
+glVertexAttribPointer [4, 4, 5126, 0, 0, const@0x0]
+glVertexAttribDivisorARB [4, 2]
+glVertexAttribDivisorARB [0, 0]
+glBufferData target=34962
+glVertexAttribPointer [0, 3, 5126, 0, 0, const@0x0]
+DRAW nativeDivisor=2 [4, 0, 6, 4]

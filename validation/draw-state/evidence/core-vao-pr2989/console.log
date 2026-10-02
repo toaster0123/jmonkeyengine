@@ -1,0 +1,10 @@
+DRIVER vendor=Mesa renderer=llvmpipe (LLVM 19.1.7, 256 bits) version=4.5 (Core Profile) Mesa 25.0.7-2+deb13u1
+INVALIDATE vertexArray=0 glErrors=0
+DIRECT-DIVISOR-CONTROL vertexArray=0 glVertexAttribDivisorErrors=[]
+PASS core invalidation compatibility control
+INFO: OpenGL Renderer Information
+ * Vendor: Mesa
+ * Renderer: llvmpipe (LLVM 19.1.7, 256 bits)
+ * OpenGL Version: 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1
+ * GLSL Version: 4.50
+ * Profile: Core
