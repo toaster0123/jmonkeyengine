@@ -57,7 +57,6 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -527,13 +526,7 @@ public class SceneLoader extends DefaultHandler implements AssetLoader {
 
             // == Run 2nd pass to load entities and other objects ==
 
-            // Added by larynx 25.06.2011
-            // Android needs the namespace aware flag set to true 
-            // Kirill 30.06.2011
-            // Now, hack is applied for both desktop and android to avoid
-            // checking with JmeSystem.
-            SAXParserFactory factory = SecureXmlFactory.createSaxParserFactory();
-            XMLReader xr = factory.newSAXParser().getXMLReader();
+            XMLReader xr = SecureXmlFactory.createSaxReader();
 
             xr.setContentHandler(this);
             xr.setErrorHandler(this);

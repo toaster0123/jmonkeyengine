@@ -25,14 +25,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Use a separate hosted pool for desktop; reserve ARM64 for the simulator.
           - name: macos
-            os: macos-15
+            os: macos-15-intel
             platform: desktop
           - name: windows
             os: windows-latest
             platform: desktop
+          # Use the same ARM64 runner family as the upstream iOS examples build.
           - name: iphone-simulator
-            os: macos-15
+            os: macos-latest
             platform: ios
     steps:
       - uses: actions/checkout@v7.0.1
@@ -51,6 +53,14 @@ jobs:
           distribution: temurin
           java-version: '25'
       - uses: gradle/actions/wrapper-validation@v6.4.0
+      - name: Report simulator toolchain
+        if: matrix.platform == 'ios'
+        shell: bash
+        run: |
+          uname -m
+          sw_vers
+          xcodebuild -version
+          xcrun simctl list runtimes available
       - name: Render both checkouts on the same runner
         if: steps.refs.outputs.reference_supported == 'true'
         shell: bash

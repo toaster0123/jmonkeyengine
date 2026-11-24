@@ -44,7 +44,6 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -130,8 +129,7 @@ class SceneMaterialLoader extends DefaultHandler {
             
             reset();
             
-            SAXParserFactory factory = SecureXmlFactory.createSaxParserFactory();
-            XMLReader xr = factory.newSAXParser().getXMLReader();
+            XMLReader xr = SecureXmlFactory.createSaxReader();
 
             xr.setContentHandler(this);
             xr.setErrorHandler(this);

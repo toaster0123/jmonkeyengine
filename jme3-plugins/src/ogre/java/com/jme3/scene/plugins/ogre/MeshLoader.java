@@ -48,7 +48,6 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.*;
@@ -869,14 +868,7 @@ public class MeshLoader extends DefaultHandler implements AssetLoader {
                 }
             }
 
-            // Added by larynx 25.06.2011
-            // Android needs the namespace aware flag set to true                 
-            // Kirill 30.06.2011
-            // Now, hack is applied for both desktop and android to avoid
-            // checking with JmeSystem.
-            SAXParserFactory factory = SecureXmlFactory.createSaxParserFactory();
-
-            XMLReader xr = factory.newSAXParser().getXMLReader();
+            XMLReader xr = SecureXmlFactory.createSaxReader();
             xr.setContentHandler(this);
             xr.setErrorHandler(this);
 
