@@ -18,26 +18,21 @@ permissions:
 
 jobs:
   compare:
-    name: Screenshot comparison (${{ matrix.name }})
+    name: Screenshot comparison (${{ matrix.name == 'macos' && 'macOS and iPhone' || matrix.name }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: ${{ matrix.name == 'macos' && 120 || 60 }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Both Apple jobs use the standard Apple Silicon runner.
+          # Desktop and iPhone use one allocation of the standard ARM64 runner.
           - name: macos
             os: macos-15
-            platform: desktop
           - name: windows
             os: windows-latest
-            platform: desktop
-          - name: iphone-simulator
-            os: macos-15
-            platform: ios
     steps:
       - name: Verify Apple Silicon runner
-        if: matrix.name == 'macos' || matrix.platform == 'ios'
+        if: matrix.name == 'macos'
         shell: bash
         run: |
           if [[ "$(uname -m)" != arm64 ]]; then
@@ -60,8 +55,26 @@ jobs:
           distribution: temurin
           java-version: '25'
       - uses: gradle/actions/wrapper-validation@v6.4.0
+        id: wrapper
+      - name: Prepare isolated iPhone checkouts
+        id: iphone_checkouts
+        if: matrix.name == 'macos' && steps.refs.outputs.reference_supported == 'true'
+        shell: bash
+        run: |
+          ios_root="$RUNNER_TEMP/jme-screenshot-ios"
+          mkdir "$ios_root"
+          git worktree add --detach "$ios_root/target" HEAD
+          git -C reference worktree add --detach "$ios_root/reference" HEAD
+      # The two platform results are independent after common setup. Neither
+      # failure is softened; the iPhone test can still run after desktop fails.
+      - name: Render desktop screenshots
+        if: ${{ !cancelled() && steps.wrapper.outcome == 'success' && steps.refs.outputs.reference_supported == 'true' }}
+        timeout-minutes: ${{ matrix.name == 'macos' && 55 || 60 }}
+        shell: bash
+        run: bash jme3-screenshot-tests/portable-platforms/run-comparison.sh desktop reference
       - name: Select and report simulator toolchain
-        if: matrix.platform == 'ios'
+        id: iphone_toolchain
+        if: ${{ !cancelled() && steps.iphone_checkouts.outcome == 'success' }}
         shell: bash
         env:
           # macos-15 defaults to Xcode 16.4; select the preinstalled 26.3 and
@@ -75,14 +88,18 @@ jobs:
           xcrun simctl list runtimes available
           xcrun simctl list devices available
           printf 'DEVELOPER_DIR=%s\n' "$DEVELOPER_DIR" >> "$GITHUB_ENV"
-      - name: Render both checkouts on the same runner
-        if: steps.refs.outputs.reference_supported == 'true'
+      - name: Render iPhone Simulator screenshots
+        if: ${{ !cancelled() && steps.iphone_toolchain.outcome == 'success' }}
+        working-directory: ${{ runner.temp }}/jme-screenshot-ios/target
         shell: bash
-        env:
-          SCREENSHOT_PLATFORM: ${{ matrix.platform }}
-        run: bash jme3-screenshot-tests/portable-platforms/run-comparison.sh "$SCREENSHOT_PLATFORM" reference
+        run: bash jme3-screenshot-tests/portable-platforms/run-comparison.sh ios ../reference
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: screenshot-platform-${{ matrix.name }}
           path: portable-screenshot-report
+      - uses: actions/upload-artifact@v7
+        if: always() && matrix.name == 'macos'
+        with:
+          name: screenshot-platform-iphone-simulator
+          path: ${{ runner.temp }}/jme-screenshot-ios/target/portable-screenshot-report
