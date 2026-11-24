@@ -20,7 +20,7 @@ jobs:
   compare:
     name: Screenshot comparison (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: ${{ matrix.timeout_minutes || 60 }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,12 +29,16 @@ jobs:
           - name: macos
             os: macos-15-intel
             platform: desktop
+            # The hosted Intel runner uses Apple Software Renderer, which can
+            # take almost a minute to reach even a successful PBR capture.
+            capture_timeout_seconds: '150'
+            timeout_minutes: 120
           - name: windows
             os: windows-latest
             platform: desktop
-          # Use the same ARM64 runner family as the upstream iOS examples build.
+          # Try the other standard ARM64 image; capacity is still managed by GitHub.
           - name: iphone-simulator
-            os: macos-latest
+            os: macos-15
             platform: ios
     steps:
       - uses: actions/checkout@v7.0.1
@@ -53,19 +57,27 @@ jobs:
           distribution: temurin
           java-version: '25'
       - uses: gradle/actions/wrapper-validation@v6.4.0
-      - name: Report simulator toolchain
+      - name: Select and report simulator toolchain
         if: matrix.platform == 'ios'
         shell: bash
+        env:
+          # macos-15 defaults to Xcode 16.4; select the preinstalled 26.3 and
+          # its iOS 26.2 SDK without changing the runner's system selection.
+          DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
         run: |
           uname -m
           sw_vers
           xcodebuild -version
+          xcrun --sdk iphonesimulator --show-sdk-version
           xcrun simctl list runtimes available
+          xcrun simctl list devices available
+          printf 'DEVELOPER_DIR=%s\n' "$DEVELOPER_DIR" >> "$GITHUB_ENV"
       - name: Render both checkouts on the same runner
         if: steps.refs.outputs.reference_supported == 'true'
         shell: bash
         env:
           SCREENSHOT_PLATFORM: ${{ matrix.platform }}
+          SCREENSHOT_CAPTURE_TIMEOUT_SECONDS: ${{ matrix.capture_timeout_seconds || '' }}
         run: bash jme3-screenshot-tests/portable-platforms/run-comparison.sh "$SCREENSHOT_PLATFORM" reference
       - uses: actions/upload-artifact@v7
         if: always()

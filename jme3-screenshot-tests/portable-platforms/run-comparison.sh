@@ -31,7 +31,7 @@ cleanup() {
   if [[ "$restore_adapter" == true ]]; then
     mv "$output/reference-original" "$reference/$adapter"
   fi
-  for file in "${additions[@]}"; do rm -f "$reference/$file"; done
+  for file in ${additions[@]+"${additions[@]}"}; do rm -f "$reference/$file"; done
   rm -rf "$output"
 }
 trap cleanup EXIT
@@ -114,6 +114,9 @@ run_pass() (
   if [[ "$(uname -s)" == Darwin && "$platform" == desktop ]]; then
     # SDL owns the first thread in the capture process; keep AWT from starting AppKit.
     java_flags=(-XstartOnFirstThread -Djava.awt.headless=true)
+    if [[ "$(uname -m)" == x86_64 && -n "${SCREENSHOT_CAPTURE_TIMEOUT_SECONDS:-}" ]]; then
+      java_flags+=("-Djme.screenshot.captureTimeoutSeconds=$SCREENSHOT_CAPTURE_TIMEOUT_SECONDS")
+    fi
     comparison_java_flag=-Djava.awt.headless=true
     renderer=LWJGL-OpenGL41
   fi
@@ -138,7 +141,7 @@ run_pass() (
         xcrun simctl terminate "$udid" "$bundle" || true
       fi
     else
-      if ! java "${java_flags[@]}" -cp "$classpath" "$main.DesktopPlatformCapture" \
+      if ! java ${java_flags[@]+"${java_flags[@]}"} -cp "$classpath" "$main.DesktopPlatformCapture" \
            "$test" "$scenario" "$(java_path "$dest")" "$renderer" >"$log.log" 2>&1; then
         failures=$((failures + 1))
         echo "::error::$pass/$test/$scenario process failed (see capture log)" >&2

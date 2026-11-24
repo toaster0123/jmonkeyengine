@@ -39,10 +39,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** Runs the desktop context on the JVM's first thread, as macOS SDL requires. */
 public final class DesktopPlatformCapture {
+    private static final String TIMEOUT_PROPERTY = "jme.screenshot.captureTimeoutSeconds";
+    private static final int DEFAULT_TIMEOUT_SECONDS = 60;
+    private static final int MAX_TIMEOUT_SECONDS = 180;
+    private static final int SHUTDOWN_GRACE_SECONDS = 15;
+
     private DesktopPlatformCapture() {
     }
 
     public static void main(String[] args) throws Exception {
+        int timeoutSeconds = captureTimeoutSeconds();
         Path output = Path.of(args[2]).toAbsolutePath();
         if (Files.exists(output)) {
             throw new IllegalArgumentException("Expected an unused output directory: " + output);
@@ -51,13 +57,24 @@ public final class DesktopPlatformCapture {
         PlatformScenarioCapture capture = app.getStateManager().getState(PlatformScenarioCapture.class);
         AtomicReference<Throwable> failure = new AtomicReference<>();
         app.onError = failure::set;
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45);
+        long deadline = System.nanoTime()
+                + TimeUnit.SECONDS.toNanos(Math.max(1, timeoutSeconds - SHUTDOWN_GRACE_SECONDS));
+        Thread launcherThread = Thread.currentThread();
         CountDownLatch finished = new CountDownLatch(1);
         Thread watchdog = new Thread(() -> {
             try {
-                if (!finished.await(60, TimeUnit.SECONDS)) {
-                    System.err.println("Screenshot process timed out (test " + args[0] + "/" + args[1] + ")");
-                    System.exit(1);
+                if (!finished.await(timeoutSeconds, TimeUnit.SECONDS)) {
+                    try {
+                        System.err.printf("Screenshot process timed out after %d s (test %s/%s; capture complete: %s)%n",
+                                timeoutSeconds, args[0], args[1], capture.complete);
+                        System.err.printf("Screenshot launcher thread %s (%s)%n",
+                                launcherThread.getName(), launcherThread.getState());
+                        for (StackTraceElement frame : launcherThread.getStackTrace()) {
+                            System.err.println("    at " + frame);
+                        }
+                    } finally {
+                        System.exit(1);
+                    }
                 }
             } catch (InterruptedException error) {
                 Thread.currentThread().interrupt();
@@ -71,6 +88,20 @@ public final class DesktopPlatformCapture {
         } finally {
             finished.countDown();
         }
+    }
+
+    private static int captureTimeoutSeconds() {
+        String configured = System.getProperty(TIMEOUT_PROPERTY, Integer.toString(DEFAULT_TIMEOUT_SECONDS));
+        try {
+            int seconds = Integer.parseInt(configured);
+            if (seconds >= 2 && seconds <= MAX_TIMEOUT_SECONDS) {
+                return seconds;
+            }
+        } catch (NumberFormatException ignored) {
+            // Report malformed configuration with the same range as numeric outliers.
+        }
+        throw new IllegalArgumentException(TIMEOUT_PROPERTY + " must be an integer from 2 to "
+                + MAX_TIMEOUT_SECONDS + " seconds");
     }
 
     private static void waitForCapture(TestContainingApp app, PlatformScenarioCapture capture,
