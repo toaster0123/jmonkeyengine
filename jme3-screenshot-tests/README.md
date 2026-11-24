@@ -147,11 +147,17 @@ change the behaviour of the test such that these are marked as warnings in the g
 
 ## macOS, Windows and iPhone Simulator
 
-The desktop and simulator adapters use the shared screenshot suite, frame
-driver and comparison assertions. They build each checkout independently and
+The shared `ScreenshotSuite` holds all 34 existing desktop image-baseline
+cases, including parameter variants and capture frames. Android instrumentation
+enumerates that same catalog. The desktop and simulator adapters use the same
+catalog, frame driver and comparison assertions. They build each checkout independently and
 render both on the same runner (and, on iOS, on the same isolated iPhone
 simulator). macOS uses its OpenGL 4.1 context; Windows uses ANGLE. The iOS
 adapter adds a PNG writer to the native test app and runs the same scene code.
+Desktop's direct render probes (`TestPbrSunExposure`, `TestMsaaFilterSampling`,
+and `TestPresentationMsaa`) remain in the existing desktop integration task:
+they assert pixel values or native framebuffer behavior, not reference images.
+The two MSAA probes explicitly use desktop LWJGL APIs.
 The standalone launchers keep each scene in a fresh process and run on the
 first JVM thread on macOS.
 

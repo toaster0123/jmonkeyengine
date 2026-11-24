@@ -33,6 +33,7 @@ package org.jmonkeyengine.screenshottests.testframework;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,7 +52,29 @@ public final class DesktopPlatformCapture {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         app.onError = failure::set;
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45);
-        app.start();
+        CountDownLatch finished = new CountDownLatch(1);
+        Thread watchdog = new Thread(() -> {
+            try {
+                if (!finished.await(60, TimeUnit.SECONDS)) {
+                    System.err.println("Screenshot process timed out (test " + args[0] + "/" + args[1] + ")");
+                    System.exit(1);
+                }
+            } catch (InterruptedException error) {
+                Thread.currentThread().interrupt();
+            }
+        }, "screenshot-watchdog");
+        watchdog.setDaemon(true);
+        watchdog.start();
+        try {
+            app.start();
+            waitForCapture(app, capture, failure, deadline);
+        } finally {
+            finished.countDown();
+        }
+    }
+
+    private static void waitForCapture(TestContainingApp app, PlatformScenarioCapture capture,
+            AtomicReference<Throwable> failure, long deadline) throws InterruptedException {
         while (!capture.complete && failure.get() == null && System.nanoTime() < deadline) {
             Thread.sleep(50);
         }

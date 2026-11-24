@@ -39,6 +39,11 @@ dependencies {
     screenshotAssets libs.jme3.testdata
 }
 
+// GraalVM runs on the host's JDK 25 and can consume the shared Java 17 framework.
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 tasks.named('compileJava') {
-    options.release = 11
+    options.release = 17
 }

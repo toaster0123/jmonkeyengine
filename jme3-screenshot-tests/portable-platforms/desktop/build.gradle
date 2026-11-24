@@ -2,6 +2,15 @@ plugins {
     id 'java'
 }
 
+// The shared screenshot framework targets Java 17 (the engine proper targets 11).
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+tasks.named('compileJava') {
+    options.release = 17
+}
+
 sourceSets.main.java.srcDir '../common/src/main/java'
 
 dependencies {
