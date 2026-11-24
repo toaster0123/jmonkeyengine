@@ -114,9 +114,6 @@ run_pass() (
   if [[ "$(uname -s)" == Darwin && "$platform" == desktop ]]; then
     # SDL owns the first thread in the capture process; keep AWT from starting AppKit.
     java_flags=(-XstartOnFirstThread -Djava.awt.headless=true)
-    if [[ "$(uname -m)" == x86_64 && -n "${SCREENSHOT_CAPTURE_TIMEOUT_SECONDS:-}" ]]; then
-      java_flags+=("-Djme.screenshot.captureTimeoutSeconds=$SCREENSHOT_CAPTURE_TIMEOUT_SECONDS")
-    fi
     comparison_java_flag=-Djava.awt.headless=true
     renderer=LWJGL-OpenGL41
   fi

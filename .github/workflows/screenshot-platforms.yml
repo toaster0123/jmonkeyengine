@@ -20,27 +20,30 @@ jobs:
   compare:
     name: Screenshot comparison (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: ${{ matrix.timeout_minutes || 60 }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Use a separate hosted pool for desktop; reserve ARM64 for the simulator.
+          # Both Apple jobs use the standard Apple Silicon runner.
           - name: macos
-            os: macos-15-intel
+            os: macos-15
             platform: desktop
-            # The hosted Intel runner uses Apple Software Renderer, which can
-            # take almost a minute to reach even a successful PBR capture.
-            capture_timeout_seconds: '150'
-            timeout_minutes: 120
           - name: windows
             os: windows-latest
             platform: desktop
-          # Try the other standard ARM64 image; capacity is still managed by GitHub.
           - name: iphone-simulator
             os: macos-15
             platform: ios
     steps:
+      - name: Verify Apple Silicon runner
+        if: matrix.name == 'macos' || matrix.platform == 'ios'
+        shell: bash
+        run: |
+          if [[ "$(uname -m)" != arm64 ]]; then
+            echo "::error::Apple screenshot tests require an Apple Silicon runner"
+            exit 1
+          fi
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.target_ref }}
@@ -77,7 +80,6 @@ jobs:
         shell: bash
         env:
           SCREENSHOT_PLATFORM: ${{ matrix.platform }}
-          SCREENSHOT_CAPTURE_TIMEOUT_SECONDS: ${{ matrix.capture_timeout_seconds || '' }}
         run: bash jme3-screenshot-tests/portable-platforms/run-comparison.sh "$SCREENSHOT_PLATFORM" reference
       - uses: actions/upload-artifact@v7
         if: always()
