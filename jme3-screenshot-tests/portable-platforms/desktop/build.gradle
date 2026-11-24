@@ -9,29 +9,16 @@ dependencies {
     implementation project(':jme3-desktop')
     implementation project(':jme3-lwjgl3')
     implementation project(':jme3-screenshot-tests:jme3-screenshot-tests-shared')
+    implementation project(':jme3-screenshot-tests:jme3-screenshot-tests-desktop')
     runtimeOnly libs.jme3.testdata
 }
 
-tasks.register('capture', JavaExec) {
-    group = 'verification'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'org.jmonkeyengine.screenshottests.testframework.DesktopPlatformCapture'
-    def mac = System.getProperty('os.name').startsWith('Mac')
-    if (mac) {
-        jvmArgs '-XstartOnFirstThread'
-    }
-    args providers.gradleProperty('screenshot.scenario').getOrElse('bitmap-text'),
-            providers.gradleProperty('screenshot.output').getOrElse(layout.buildDirectory.dir('captured').get().asFile.absolutePath),
-            providers.gradleProperty('screenshot.renderer').getOrElse(mac ? 'LWJGL-OpenGL41' : 'ANGLE_GLES3')
-}
-
-tasks.register('compare', JavaExec) {
-    group = 'verification'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'org.jmonkeyengine.screenshottests.testframework.ComparePlatformCaptures'
-    doFirst {
-        args providers.gradleProperty('screenshot.referenceDir').get(),
-                providers.gradleProperty('screenshot.targetDir').get(),
-                providers.gradleProperty('screenshot.reportDir').get()
+tasks.register('prepareLauncher') {
+    dependsOn tasks.named('classes')
+    inputs.files sourceSets.main.runtimeClasspath
+    def file = layout.buildDirectory.file('launcher-classpath.txt')
+    outputs.file(file)
+    doLast {
+        file.get().asFile.text = sourceSets.main.runtimeClasspath.asPath
     }
 }

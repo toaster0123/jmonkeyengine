@@ -42,11 +42,11 @@ public final class DesktopPlatformCapture {
     }
 
     public static void main(String[] args) throws Exception {
-        Path output = Path.of(args[1]).toAbsolutePath();
+        Path output = Path.of(args[2]).toAbsolutePath();
         if (Files.exists(output)) {
             throw new IllegalArgumentException("Expected an unused output directory: " + output);
         }
-        TestContainingApp app = PlatformScenarioCapture.create(args[0], output, args[2], true);
+        TestContainingApp app = PlatformScenarioCapture.create(args[0], Integer.parseInt(args[1]), output, args[3], true);
         PlatformScenarioCapture capture = app.getStateManager().getState(PlatformScenarioCapture.class);
         AtomicReference<Throwable> failure = new AtomicReference<>();
         app.onError = failure::set;

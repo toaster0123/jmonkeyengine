@@ -31,72 +31,58 @@
  */
 package org.jmonkeyengine.screenshottests.testframework;
 
-import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppState;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.math.FastMath;
 import com.jme3.system.AppSettings;
-import com.jme3.texture.FrameBuffer;
-import com.jme3.texture.Image;
-import com.jme3.texture.Texture;
-import com.jme3.texture.Texture2D;
-import com.jme3.texture.image.ColorSpace;
-import com.jme3.util.BufferUtils;
-import org.jmonkeyengine.screenshottests.scenarios.gui.ScenarioBitmapText3D;
-import org.jmonkeyengine.screenshottests.scenarios.material.ScenarioSimpleBumps;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
-/** Adapts existing shared screenshot scenarios to standalone desktop and native iOS processes. */
+/** Runs one existing screenshot test scenario with the common test driver. */
 final class PlatformScenarioCapture extends AbstractAppState {
-    private final List<Integer> frames;
-    private final TestResolution resolution;
+    private final TestDriver driver;
     private final Path output;
+    private final String scenarioName;
+    private final List<Integer> frames;
     private final boolean stopWhenComplete;
-    private FrameBuffer buffer;
-    private ByteBuffer pixels;
-    private Application app;
-    private int frame;
-    private int count;
+    private TestContainingApp application;
     volatile boolean complete;
 
-    private PlatformScenarioCapture(ScreenshotTest test, Path output, boolean stopWhenComplete) {
-        this.frames = new ArrayList<>(test.framesToTakeScreenshotsOn);
-        this.resolution = test.resolution;
+    private PlatformScenarioCapture(TestDriver driver, Path output, String scenarioName, List<Integer> frames,
+            boolean stopWhenComplete) {
+        this.driver = driver;
         this.output = output;
+        this.scenarioName = scenarioName;
+        this.frames = frames;
         this.stopWhenComplete = stopWhenComplete;
     }
 
-    static TestContainingApp create(String name, Path output, String renderer, boolean stopWhenComplete) {
-        ScreenshotTest test;
-        switch (name) {
-            case "bitmap-text":
-                test = ScenarioBitmapText3D.testBitmapText3D();
-                break;
-            case "simple-bumps":
-                test = ScenarioSimpleBumps.testSimpleBumps();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown screenshot scenario: " + name);
+    static TestContainingApp create(String id, int index, Path output, String renderer, boolean stopWhenComplete) {
+        Supplier<ScreenshotTest> factory = ScreenshotSuite.all().get(id);
+        if (factory == null) {
+            throw new IllegalArgumentException("Unknown screenshot test: " + id);
         }
-        if (test.scenarios.size() != 1 || test.framesToTakeScreenshotsOn.isEmpty()) {
-            throw new IllegalArgumentException("Expected one scenario with at least one capture frame");
-        }
+        ScreenshotTest test = factory.get();
+        Scenario scenario = test.scenarios.get(index);
+        List<Integer> frames = new ArrayList<>(test.framesToTakeScreenshotsOn);
         FastMath.rand.setSeed(0);
-        List<AppState> states = new ArrayList<>(Arrays.asList(test.scenarios.get(0).states));
-        PlatformScenarioCapture capture = new PlatformScenarioCapture(test, output, stopWhenComplete);
+        TestDriver driver = new TestDriver(scenario.scenarioName, frames);
+        driver.waitLatch = new CountDownLatch(1);
+        PlatformScenarioCapture capture = new PlatformScenarioCapture(
+                driver, output, scenario.scenarioName, frames, stopWhenComplete);
+        List<AppState> states = new ArrayList<>(Arrays.asList(scenario.states));
+        states.add(driver);
         states.add(capture);
-        TestContainingApp result = new TestContainingApp(states.toArray(new AppState[0])) {
+        TestContainingApp app = new TestContainingApp(states.toArray(new AppState[0])) {
             @Override
             public void handleError(String message, Throwable cause) {
                 IllegalStateException failure = new IllegalStateException(message, cause);
@@ -107,66 +93,40 @@ final class PlatformScenarioCapture extends AbstractAppState {
                 }
             }
         };
+        capture.application = app;
         AppSettings settings = new AppSettings(true);
         settings.setRenderer(renderer);
         settings.setResolution(test.resolution.getWidth(), test.resolution.getHeight());
         settings.setDisplayScaleMode(test.displayScaleMode);
         settings.setAudioRenderer(null);
         settings.setUseInput(false);
-        settings.setGammaCorrection(false);
-        result.setSettings(settings);
-        result.setShowSettings(false);
-        return result;
-    }
-
-    @Override
-    public void initialize(AppStateManager manager, Application application) {
-        super.initialize(manager, application);
-        app = application;
-        int width = resolution.getWidth();
-        int height = resolution.getHeight();
-        Texture2D color = new Texture2D(width, height, Image.Format.RGBA8);
-        color.setMinFilter(Texture.MinFilter.BilinearNearestMipMap);
-        color.setMagFilter(Texture.MagFilter.Bilinear);
-        color.getImage().setColorSpace(ColorSpace.sRGB);
-        buffer = new FrameBuffer(width, height, 1);
-        buffer.setDepthTarget(FrameBuffer.FrameBufferTarget.newTarget(Image.Format.Depth));
-        buffer.addColorTarget(FrameBuffer.FrameBufferTarget.newTarget(color));
-        buffer.setSrgb(true);
-        pixels = BufferUtils.createByteBuffer(width * height * 4);
-        app.getRenderer().setMainFrameBufferOverride(buffer);
+        app.setSettings(settings);
+        app.setShowSettings(false);
+        return app;
     }
 
     @Override
     public void postRender() {
-        if (complete) {
+        if (complete || driver.waitLatch.getCount() != 0) {
             return;
         }
-        int tick = frame++;
-        if (!frames.contains(tick)) {
-            return;
-        }
-        pixels.clear();
-        app.getRenderer().readFrameBufferWithFormat(buffer, pixels, Image.Format.RGBA8);
-        pixels.rewind();
-        byte[] rgba = new byte[pixels.remaining()];
-        pixels.get(rgba);
         try {
             Files.createDirectories(output);
-            try (DataOutputStream stream = new DataOutputStream(Files.newOutputStream(
-                    output.resolve("f" + tick + ".rgba")))) {
-                stream.writeInt(buffer.getWidth());
-                stream.writeInt(buffer.getHeight());
-                stream.write(rgba);
-            }
-            if (++count == frames.size()) {
-                Path marker = output.resolve("complete.tmp");
-                Files.writeString(marker, Integer.toString(count));
-                Files.move(marker, output.resolve("complete"), StandardCopyOption.ATOMIC_MOVE);
-                complete = true;
-                if (stopWhenComplete) {
-                    app.stop(false);
+            for (int frame : frames) {
+                Path screenshot = driver.screenshotsAtFrames.getScreenshotsAtFrame(scenarioName, frame)
+                        .orElseThrow(() -> new IOException("Missing screenshot at frame " + frame));
+                if (Files.size(screenshot) == 0) {
+                    throw new IOException("Empty screenshot at frame " + frame);
                 }
+                Files.copy(screenshot, output.resolve("f" + frame + ".png"));
+                Files.deleteIfExists(screenshot);
+            }
+            Path marker = output.resolve("complete.tmp");
+            Files.writeString(marker, Integer.toString(frames.size()));
+            Files.move(marker, output.resolve("complete"), StandardCopyOption.ATOMIC_MOVE);
+            complete = true;
+            if (stopWhenComplete) {
+                application.stop(false);
             }
         } catch (IOException exception) {
             throw new UncheckedIOException("Could not save screenshot in " + output, exception);

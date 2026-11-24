@@ -29,7 +29,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.jmonkeyengine.screenshottests.texture;
+package org.jmonkeyengine.screenshottests.scenarios.texture;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -39,20 +39,20 @@ import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 
 import org.jmonkeyengine.screenshottests.testframework.TestResolution;
-import org.jmonkeyengine.screenshottests.testframework.desktop.DesktopRunner;
-import org.jmonkeyengine.screenshottests.testframework.desktop.ScreenshotTestDesktopBase;
-import org.junit.jupiter.api.Test;
+import org.jmonkeyengine.screenshottests.testframework.ScreenshotTest;
 
 /**
  * Screenshot test for single-channel PNG loading.
  */
-public class TestSingleChannelTexture extends ScreenshotTestDesktopBase {
+public final class ScenarioSingleChannelTexture {
 
     private static final int TEXTURE_SIZE = 251;
 
-    @Test
-    public void testSingleChannelTexture() {
-        screenshotTest(new BaseAppState() {
+    private ScenarioSingleChannelTexture() {
+    }
+
+    public static ScreenshotTest testSingleChannelTexture() {
+        return new ScreenshotTest(new BaseAppState() {
             @Override
             protected void initialize(Application app) {
                 SimpleApplication simpleApplication = (SimpleApplication) app;
@@ -85,8 +85,7 @@ public class TestSingleChannelTexture extends ScreenshotTestDesktopBase {
             protected void onDisable() {
             }
         })
-        .setTestResolution(new TestResolution(TEXTURE_SIZE * 2, TEXTURE_SIZE))
-        .setFramesToTakeScreenshotsOn(1)
-        .run(new DesktopRunner());
+                .setTestResolution(new TestResolution(TEXTURE_SIZE * 2, TEXTURE_SIZE))
+                .setFramesToTakeScreenshotsOn(1);
     }
 }

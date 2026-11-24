@@ -15,9 +15,11 @@
 
 name: Android Screenshot Test
 
-# Pull requests only: a push has no reviewer to look at its visual changes.
+## The dedicated fork branch also runs on push to validate the platform work.
 on:
   pull_request:
+  push:
+    branches: [test/screenshots-desktop-ios]
   workflow_dispatch:
     inputs:
       reference_ref:
@@ -52,7 +54,8 @@ jobs:
         id: refs
         uses: ./.github/actions/screenshot-reference-checkout
         with:
-          reference_ref: ${{ inputs.reference_ref }}
+          # Keep fork-only push checks pinned to their verified upstream baseline.
+          reference_ref: ${{ inputs.reference_ref || (github.event_name == 'push' && '99fbd097325892e3243c8bb3a504298fbdf710f3') || '' }}
 
       - name: Setup the java environment
         uses: actions/setup-java@v6.1.0

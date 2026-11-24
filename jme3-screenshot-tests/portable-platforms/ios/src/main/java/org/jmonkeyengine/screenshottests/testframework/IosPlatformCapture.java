@@ -34,12 +34,25 @@ package org.jmonkeyengine.screenshottests.testframework;
 import com.jme3.app.Application;
 import com.jme3.app.IosApplicationLauncher;
 import com.jme3.system.AppSettings;
-import java.nio.file.Path;
+import com.jme3.system.JmeSystem;
+import com.jme3.system.ios.JmeIosSystem;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.util.zip.CRC32;
+import java.util.zip.DeflaterOutputStream;
+
+/** iOS lifecycle and PNG output adapter; offscreen rendering still uses TestDriver. */
 public final class IosPlatformCapture extends IosApplicationLauncher {
     @Override
     protected Application createApplication() {
-        return PlatformScenarioCapture.create(requiredEnvironment("JME_SCREENSHOT_SCENARIO"),
+        JmeSystem.setSystemDelegate(new ScreenshotIosSystem());
+        return PlatformScenarioCapture.create(requiredEnvironment("JME_SCREENSHOT_TEST"),
+                Integer.parseInt(requiredEnvironment("JME_SCREENSHOT_SCENARIO")),
                 Path.of(requiredEnvironment("JME_SCREENSHOT_OUTPUT")), AppSettings.ANGLE_GLES3, false);
     }
 
@@ -49,5 +62,45 @@ public final class IosPlatformCapture extends IosApplicationLauncher {
             throw new IllegalStateException("Missing environment variable " + name);
         }
         return value;
+    }
+
+    private static final class ScreenshotIosSystem extends JmeIosSystem {
+        @Override
+        public void writeImageFile(OutputStream output, String format, ByteBuffer input, int width, int height)
+                throws IOException {
+            if (!"png".equalsIgnoreCase(format)) {
+                throw new IOException("Unsupported simulator screenshot format: " + format);
+            }
+            ByteBuffer pixels = input.duplicate();
+            byte[] row = new byte[width * 4];
+            ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+            try (DeflaterOutputStream image = new DeflaterOutputStream(compressed)) {
+                for (int y = height - 1; y >= 0; y--) {
+                    pixels.position(y * row.length);
+                    pixels.get(row);
+                    image.write(0); // PNG scanline filter: none.
+                    image.write(row);
+                }
+            }
+            DataOutputStream png = new DataOutputStream(output);
+            png.writeLong(0x89504e470d0a1a0aL);
+            ByteBuffer header = ByteBuffer.allocate(13);
+            header.putInt(width).putInt(height).put((byte) 8).put((byte) 6);
+            chunk(png, "IHDR", header.array());
+            chunk(png, "IDAT", compressed.toByteArray());
+            chunk(png, "IEND", new byte[0]);
+            png.flush();
+        }
+
+        private static void chunk(DataOutputStream png, String type, byte[] data) throws IOException {
+            byte[] kind = type.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+            CRC32 crc = new CRC32();
+            crc.update(kind);
+            crc.update(data);
+            png.writeInt(data.length);
+            png.write(kind);
+            png.write(data);
+            png.writeInt((int) crc.getValue());
+        }
     }
 }

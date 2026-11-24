@@ -147,26 +147,26 @@ change the behaviour of the test such that these are marked as warnings in the g
 
 ## macOS, Windows and iPhone Simulator
 
-The additional Screenshot Comparison workflow runs two existing shared scenes
-(bitmap text and simple bumps) on macOS OpenGL, Windows ANGLE and the
-libJGLIOS-powered iPhone Simulator. The desktop and iOS launchers run the same
-scenario factories already used by the desktop and Android suites. They do not
-introduce a second implementation of either scene.
+The desktop and simulator adapters use the shared screenshot suite, frame
+driver and comparison assertions. They build each checkout independently and
+render both on the same runner (and, on iOS, on the same isolated iPhone
+simulator). macOS uses its OpenGL 4.1 context; Windows uses ANGLE. The iOS
+adapter adds a PNG writer to the native test app and runs the same scene code.
+The standalone launchers keep each scene in a fresh process and run on the
+first JVM thread on macOS.
 
-As on Linux and Android, reference and target are built from their own engine
-and scene sources and rendered on the same runner. For iOS, both passes also
-use the same newly created simulator. The comparison uses the shared
-`ImageDifference` tolerance. Changed pixels are reported and the reference and
-actual PNGs are available as artifacts; a missing, incomplete, malformed or
-blank capture fails the job. The simulator app logs are included. This initial
-platform matrix is a subset, not the whole desktop/Android suite.
+The workflow uploads capture logs and comparison artifacts. Missing captures
+and failed within-test equivalence assertions fail the job; reference/target
+visual differences are reported as in the existing screenshot suite. Each
+platform run uses a separate reference set. New screenshot cases on the
+target are reported without using themselves as their own baseline.
 
-To reproduce from the branch under test with a disposable reference checkout:
+From the checkout under test, with a separate reference checkout:
 
 ```sh
 bash jme3-screenshot-tests/portable-platforms/run-comparison.sh desktop /path/to/reference
 bash jme3-screenshot-tests/portable-platforms/run-comparison.sh ios /path/to/reference
 ```
 
-The iOS run requires Xcode with an installed iPhone Simulator runtime on an
+The iOS run requires Xcode and an installed iPhone Simulator runtime on an
 Apple Silicon Mac.

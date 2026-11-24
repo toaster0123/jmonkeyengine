@@ -32,92 +32,156 @@
 package org.jmonkeyengine.screenshottests.testframework;
 
 import com.jme3.texture.Image;
-import com.jme3.texture.image.ColorSpace;
-import com.jme3.util.BufferUtils;
+import org.jmonkeyengine.screenshottests.testframework.desktop.DesktopRunner;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
-/** Host-side comparison with the same pixel tolerance as the other screenshot jobs. */
+/** Reuses ScreenshotTest assertions and reporting with images captured out of process. */
 public final class ComparePlatformCaptures {
     private ComparePlatformCaptures() {
     }
 
     public static void main(String[] args) throws IOException {
-        Path reference = Path.of(args[0]);
-        Path target = Path.of(args[1]);
-        Path report = Path.of(args[2]);
-        for (String scenario : List.of("bitmap-text", "simple-bumps")) {
-            Path oldDir = reference.resolve(scenario);
-            Path newDir = target.resolve(scenario);
-            List<String> oldFrames = completedFrames(oldDir);
-            List<String> newFrames = completedFrames(newDir);
-            if (!oldFrames.equals(newFrames)) {
-                throw new IOException("Mismatched frame sets for " + scenario + ": "
-                        + oldFrames + " vs " + newFrames);
+        String operation = args[0];
+        Path captures = Path.of(args[1]);
+        Map<String, Supplier<ScreenshotTest>> suite = ScreenshotSuite.all();
+        if (suite.isEmpty()) {
+            throw new IllegalStateException("No screenshot tests in shared suite");
+        }
+        List<String> manifest = new ArrayList<>();
+        for (Map.Entry<String, Supplier<ScreenshotTest>> entry : suite.entrySet()) {
+            String id = entry.getKey();
+            if (!id.matches("[a-zA-Z0-9._-]+") || id.equals(".") || id.equals("..")) {
+                throw new IllegalArgumentException("Invalid screenshot identifier: " + id);
             }
-            for (String frame : oldFrames) {
-                Image before = read(oldDir.resolve(frame));
-                Image after = read(newDir.resolve(frame));
-                String name = frame.replace(".rgba", ".png");
-                ScreenshotImageIo.writePng(before, report.resolve(scenario).resolve("reference-" + name));
-                ScreenshotImageIo.writePng(after, report.resolve(scenario).resolve("actual-" + name));
-                String result;
-                if (before.getWidth() != after.getWidth() || before.getHeight() != after.getHeight()) {
-                    result = "changed dimensions";
-                } else {
-                    ImageDifference difference = ImageDifference.of(before, after);
-                    result = difference.isNegligible() ? "matched" : "changed pixels: " + difference.getDifferentPixels();
+            int count = entry.getValue().get().scenarios.size();
+            if (count == 0) {
+                throw new IllegalArgumentException("Missing scenarios for " + id);
+            }
+            for (int i = 0; i < count; i++) {
+                manifest.add(id + "\t" + i);
+            }
+        }
+        if (operation.equals("list")) {
+            Files.write(captures, manifest);
+            return;
+        }
+        boolean generate = operation.equals("generate");
+        if (!generate && !operation.equals("compare")) {
+            throw new IllegalArgumentException("Unknown screenshot operation: " + operation);
+        }
+        Path baseline = Path.of(args[2]).toAbsolutePath();
+        Path report = Path.of(args[3]).toAbsolutePath();
+        Files.createDirectories(baseline);
+        if (generate) {
+            Files.deleteIfExists(baseline.resolve(ScreenshotTest.REFERENCE_RUN_COMPLETE_MARKER));
+        }
+        System.setProperty(ScreenshotTest.MODE_SYSTEM_PROPERTY, operation);
+        System.setProperty(ScreenshotTest.REFERENCE_DIRECTORY_SYSTEM_PROPERTY, baseline.toString());
+
+        int failed = 0;
+        for (Map.Entry<String, Supplier<ScreenshotTest>> entry : suite.entrySet()) {
+            String id = entry.getKey();
+            TestReportCaptureBase.INSTANCE = new Report(report.resolve(id), id);
+            try {
+                ScreenshotTest test = entry.getValue().get().setBaseImageFileName(id);
+                test.run(new CapturedRunner(captures.resolve(id), report.resolve("changed-images"), test.scenarios));
+            } catch (RuntimeException | AssertionError error) {
+                error.printStackTrace();
+                failed++;
+            } finally {
+                TestReportCaptureBase.INSTANCE = null;
+            }
+        }
+        if (failed != 0) {
+            throw new IllegalStateException(failed + " screenshot test(s) failed; inspect the report and capture logs");
+        }
+        if (generate) {
+            Files.writeString(baseline.resolve(ScreenshotTest.REFERENCE_RUN_COMPLETE_MARKER), "Reference complete");
+        }
+        System.out.println("Completed " + suite.size() + " tests / " + manifest.size() + " scenarios (" + operation + ")");
+    }
+
+    private static final class CapturedRunner extends DesktopRunner {
+        private final Path input;
+        private final Path changed;
+        private final List<Scenario> scenarios;
+        private int scenario;
+
+        CapturedRunner(Path input, Path changed, List<Scenario> scenarios) {
+            this.input = input;
+            this.changed = changed;
+            this.scenarios = scenarios;
+        }
+
+        @Override
+        public void runApplicationUntilScenarioCompletes(TestContainingApp app, CountDownLatch finished) {
+            TestDriver driver = app.getStateManager().getState(TestDriver.class);
+            String scenarioName = scenarios.get(scenario).scenarioName;
+            Path directory = input.resolve(Integer.toString(scenario++));
+            try {
+                int count = Integer.parseInt(Files.readString(directory.resolve("complete")).trim());
+                if (count != driver.framesToTakeScreenshotsOn.size()) {
+                    throw new IOException("Unexpected frame count in " + directory);
                 }
-                System.out.println(scenario + "/" + frame + ": " + result);
+                for (int frame : driver.framesToTakeScreenshotsOn) {
+                    Path png = directory.resolve("f" + frame + ".png");
+                    if (!Files.isRegularFile(png) || Files.size(png) == 0) {
+                        throw new IOException("Missing or empty frame " + png);
+                    }
+                    driver.screenshotsAtFrames.recordScreenshot(scenarioName, frame, png);
+                }
+                finished.countDown();
+            } catch (IOException error) {
+                throw new UncheckedIOException("No complete screenshot capture: " + directory, error);
             }
+        }
+
+        @Override
+        public Path getChangedImagesDirectory() {
+            return changed;
+        }
+
+        @Override
+        public <V> V fail(String message) {
+            throw new AssertionError(message);
         }
     }
 
-    private static List<String> completedFrames(Path directory) throws IOException {
-        int expected = Integer.parseInt(Files.readString(directory.resolve("complete")).trim());
-        List<String> frames;
-        try (Stream<Path> paths = Files.list(directory)) {
-            frames = paths.filter(Files::isRegularFile).map(path -> path.getFileName().toString())
-                    .filter(name -> name.matches("f[0-9]+\\.rgba")).sorted().collect(Collectors.toList());
-        }
-        if (expected < 1 || frames.size() != expected) {
-            throw new IOException("Incomplete screenshot capture: " + directory);
-        }
-        return frames;
-    }
+    private static final class Report extends TestReportCaptureBase {
+        private final Path output;
+        private final String id;
 
-    private static Image read(Path file) throws IOException {
-        try (DataInputStream stream = new DataInputStream(Files.newInputStream(file))) {
-            int width = stream.readInt();
-            int height = stream.readInt();
-            if (width < 1 || height < 1 || width > 4096 || height > 4096
-                    || Files.size(file) != 8L + 4L * width * height) {
-                throw new IOException("Invalid screenshot dimensions or length: " + file);
+        Report(Path output, String id) {
+            this.output = output;
+            this.id = id;
+        }
+
+        @Override
+        public void markFailInReport(String message) {
+            System.err.println(id + ": " + message);
+        }
+
+        @Override
+        public void warning(String message) {
+            System.out.println(id + ": " + message);
+        }
+
+        @Override
+        public void attachImageInner(String title, String fileName, Image image) {
+            try {
+                ScreenshotImageIo.writePng(image, output.resolve(fileName));
+            } catch (IOException error) {
+                throw new UncheckedIOException("Could not save report image " + fileName, error);
             }
-            byte[] bytes = stream.readNBytes(width * height * 4);
-            if (bytes.length != width * height * 4) {
-                throw new IOException("Incomplete screenshot: " + file);
-            }
-            boolean hasContent = false;
-            for (int index = 0; index < bytes.length; index += 4) {
-                if (bytes[index] != 0 || bytes[index + 1] != 0 || bytes[index + 2] != 0) {
-                    hasContent = true;
-                    break;
-                }
-            }
-            if (!hasContent) {
-                throw new IOException("Blank screenshot: " + file);
-            }
-            ByteBuffer pixels = BufferUtils.createByteBuffer(bytes.length);
-            pixels.put(bytes).flip();
-            return new Image(Image.Format.RGBA8, width, height, pixels, ColorSpace.sRGB);
         }
     }
 }

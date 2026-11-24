@@ -44,7 +44,8 @@ jobs:
         id: refs
         uses: ./.github/actions/screenshot-reference-checkout
         with:
-          reference_ref: ${{ inputs.reference_ref }}
+          # Keep fork-only push checks pinned to their verified upstream baseline.
+          reference_ref: ${{ inputs.reference_ref || (github.event_name == 'push' && '99fbd097325892e3243c8bb3a504298fbdf710f3') || '' }}
       - uses: actions/setup-java@v6.1.0
         with:
           distribution: temurin

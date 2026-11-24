@@ -18,7 +18,7 @@ configurations {
 
 def extractScreenshotAssets = tasks.register('extractScreenshotAssets', Sync) {
     from({ configurations.screenshotAssets.collect { zipTree(it) } })
-    include 'Textures/BumpMapTest/**'
+    exclude 'META-INF/**'
     into layout.buildDirectory.dir('screenshot-assets')
 }
 

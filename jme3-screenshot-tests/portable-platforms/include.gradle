@@ -1,5 +1,10 @@
 // Add only the platform adapters to a checkout. Its engine and shared scenes are untouched.
 gradle.settingsEvaluated { settings ->
+    // Init scripts are also loaded by composite builds (including jme3-nativeimage-plugin).
+    if (settings.gradle.parent != null || !new File(settings.settingsDir,
+            'jme3-screenshot-tests/portable-platforms/desktop/build.gradle').isFile()) {
+        return
+    }
     ['desktop', 'ios'].each { platform ->
         if (platform == 'ios' && settings.gradle.startParameter.projectProperties['screenshot.ios'] != 'true') {
             return
