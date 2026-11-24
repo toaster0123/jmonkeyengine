@@ -72,6 +72,9 @@ public class AndroidRunner implements AppRunner {
      */
     public static final String REFERENCE_IMAGES_DIRECTORY = "reference-images";
 
+    // Software-rendered emulators can spend tens of seconds on IBL bake frames.
+    private static final int SCENARIO_TIMEOUT_SECONDS = 120;
+
     private static final Logger logger = Logger.getLogger(AndroidRunner.class.getName());
 
     /**
@@ -93,21 +96,20 @@ public class AndroidRunner implements AppRunner {
                 return super.instantiate(classLoader, className);
             }
         };
+        boolean completed;
+        String timeoutMessage = "Android screenshot scenario did not complete within "
+                + SCENARIO_TIMEOUT_SECONDS + " seconds";
         try (FragmentScenario<AndroidTestHarness> scenario = FragmentScenario.launchInContainer(
                 AndroidTestHarness.class,
                 Bundle.EMPTY,
                 androidx.appcompat.R.style.Theme_AppCompat,
                 fragmentFactory
         )) {
-            int maxWaitTimeMilliseconds = 45000;
-
             try {
-                boolean exitedProperly = applicationFinishedLatch.await(maxWaitTimeMilliseconds, TimeUnit.MILLISECONDS);
-
-                if (!exitedProperly) {
-                    logger.warning("Test driver did not exit in " + maxWaitTimeMilliseconds + "ms. Timed out");
+                completed = applicationFinishedLatch.await(SCENARIO_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                if (!completed) {
+                    logger.warning(timeoutMessage);
                 }
-
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
@@ -119,6 +121,8 @@ public class AndroidRunner implements AppRunner {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
+        // Fail after releasing the fragment and giving GLES time to tear down.
+        Assert.assertTrue(timeoutMessage, completed);
     }
 
     @Override
