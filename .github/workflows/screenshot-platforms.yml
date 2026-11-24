@@ -1,0 +1,63 @@
+name: Screenshot Comparison (macOS, Windows, iPhone)
+
+on:
+  pull_request:
+  push:
+    branches: [test/screenshots-desktop-ios]
+  workflow_dispatch:
+    inputs:
+      reference_ref:
+        description: 'Ref to generate reference screenshots from'
+        required: true
+      target_ref:
+        description: 'Reviewed ref under test'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: Screenshot comparison (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos
+            os: macos-15
+            platform: desktop
+          - name: windows
+            os: windows-latest
+            platform: desktop
+          - name: iphone-simulator
+            os: macos-15
+            platform: ios
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.target_ref }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Resolve and check out the reference
+        id: refs
+        uses: ./.github/actions/screenshot-reference-checkout
+        with:
+          reference_ref: ${{ inputs.reference_ref }}
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/wrapper-validation@v6.4.0
+      - name: Render both checkouts on the same runner
+        if: steps.refs.outputs.reference_supported == 'true'
+        shell: bash
+        env:
+          SCREENSHOT_PLATFORM: ${{ matrix.platform }}
+        run: bash jme3-screenshot-tests/portable-platforms/run-comparison.sh "$SCREENSHOT_PLATFORM" reference
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: screenshot-platform-${{ matrix.name }}
+          path: portable-screenshot-report

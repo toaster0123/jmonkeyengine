@@ -144,3 +144,29 @@ change the behaviour of the test such that these are marked as warnings in the g
     .run();
 )
 ```
+
+## macOS, Windows and iPhone Simulator
+
+The additional Screenshot Comparison workflow runs two existing shared scenes
+(bitmap text and simple bumps) on macOS OpenGL, Windows ANGLE and the
+libJGLIOS-powered iPhone Simulator. The desktop and iOS launchers run the same
+scenario factories already used by the desktop and Android suites. They do not
+introduce a second implementation of either scene.
+
+As on Linux and Android, reference and target are built from their own engine
+and scene sources and rendered on the same runner. For iOS, both passes also
+use the same newly created simulator. The comparison uses the shared
+`ImageDifference` tolerance. Changed pixels are reported and the reference and
+actual PNGs are available as artifacts; a missing, incomplete, malformed or
+blank capture fails the job. The simulator app logs are included. This initial
+platform matrix is a subset, not the whole desktop/Android suite.
+
+To reproduce from the branch under test with a disposable reference checkout:
+
+```sh
+bash jme3-screenshot-tests/portable-platforms/run-comparison.sh desktop /path/to/reference
+bash jme3-screenshot-tests/portable-platforms/run-comparison.sh ios /path/to/reference
+```
+
+The iOS run requires Xcode with an installed iPhone Simulator runtime on an
+Apple Silicon Mac.

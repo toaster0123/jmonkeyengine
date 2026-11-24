@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath libs.libjglios.gradle.plugin
+    }
+}
+
+apply plugin: 'org.ngengine.libjglios'
+
+configurations {
+    screenshotAssets {
+        transitive = false
+    }
+}
+
+def extractScreenshotAssets = tasks.register('extractScreenshotAssets', Sync) {
+    from({ configurations.screenshotAssets.collect { zipTree(it) } })
+    include 'Textures/BumpMapTest/**'
+    into layout.buildDirectory.dir('screenshot-assets')
+}
+
+iOS {
+    mainClass = 'org.jmonkeyengine.screenshottests.testframework.IosPlatformCapture'
+    bundleId = 'org.jmonkeyengine.screenshottests.ios'
+    appName = 'JmeScreenshotTests'
+    assets.from extractScreenshotAssets
+}
+
+sourceSets.main.java.srcDir '../common/src/main/java'
+
+dependencies {
+    implementation project(':jme3-core')
+    implementation project(':jme3-ios')
+    implementation project(':jme3-saferallocator')
+    implementation project(':jme3-screenshot-tests:jme3-screenshot-tests-shared')
+    screenshotAssets libs.jme3.testdata
+}
+
+tasks.named('compileJava') {
+    options.release = 11
+}

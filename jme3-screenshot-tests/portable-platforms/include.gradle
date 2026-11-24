@@ -1,0 +1,12 @@
+// Add only the platform adapters to a checkout. Its engine and shared scenes are untouched.
+gradle.settingsEvaluated { settings ->
+    ['desktop', 'ios'].each { platform ->
+        if (platform == 'ios' && settings.gradle.startParameter.projectProperties['screenshot.ios'] != 'true') {
+            return
+        }
+        String projectPath = ":screenshot-platform-${platform}"
+        settings.include(projectPath)
+        settings.project(projectPath).projectDir = new File(settings.settingsDir,
+                "jme3-screenshot-tests/portable-platforms/${platform}")
+    }
+}
