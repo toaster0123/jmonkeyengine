@@ -109,9 +109,12 @@ run_pass() (
     data="$(xcrun simctl get_app_container "$udid" "$bundle" data)"
   fi
   java_flags=()
+  comparison_java_flag=
   renderer=ANGLE_GLES3
   if [[ "$(uname -s)" == Darwin && "$platform" == desktop ]]; then
-    java_flags=(-XstartOnFirstThread)
+    # SDL owns the first thread in the capture process; keep AWT from starting AppKit.
+    java_flags=(-XstartOnFirstThread -Djava.awt.headless=true)
+    comparison_java_flag=-Djava.awt.headless=true
     renderer=LWJGL-OpenGL41
   fi
   failures=0
@@ -152,7 +155,7 @@ run_pass() (
     exit 1
   fi
   mode="$([[ "$pass" == reference ]] && echo generate || echo compare)"
-  java -cp "$classpath" "$main.ComparePlatformCaptures" "$mode" "$(java_path "$output/$pass")" \
+  java ${comparison_java_flag:+"$comparison_java_flag"} -cp "$classpath" "$main.ComparePlatformCaptures" "$mode" "$(java_path "$output/$pass")" \
     "$(java_path "$output/baseline")" "$(java_path "$report/$pass")" | tee "$report/$pass.txt"
 )
 
