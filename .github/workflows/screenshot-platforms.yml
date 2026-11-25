@@ -27,7 +27,7 @@ jobs:
         include:
           # Desktop and iPhone use one allocation of the standard ARM64 runner.
           - name: macos
-            os: macos-15
+            os: macos-latest
           - name: windows
             os: windows-latest
     steps:
@@ -77,8 +77,8 @@ jobs:
         if: ${{ !cancelled() && steps.iphone_checkouts.outcome == 'success' }}
         shell: bash
         env:
-          # macos-15 defaults to Xcode 16.4; select the preinstalled 26.3 and
-          # its iOS 26.2 SDK without changing the runner's system selection.
+          # Pin Xcode for repeatable simulator comparisons without changing
+          # the runner's system selection.
           DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
         run: |
           uname -m
